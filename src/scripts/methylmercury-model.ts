@@ -149,7 +149,7 @@ function makeDerivatives(
       bp.QFa * (y[3] / (bp.VFa * P.Fa) - cPl) +
       bp.QRp * (y[4] / (bp.VRp * P.Rp) - cPl) +
       bp.QSp * (y[5] / (bp.VSp * P.Sp) - cPl) +
-      bp.QLv * (y[6] / (bp.VLv * P.Lv) - cPl) +
+      (bp.QLv + bp.QGt) * (y[6] / (bp.VLv * P.Lv) - cPl) +
       bp.QKi * (y[9] / (bp.VKi * P.Ki) - cPl) +
       kRPlScaled * y[10] - kPlRScaled * y[0];
 
@@ -177,7 +177,7 @@ function makeDerivatives(
 
     // Gut tissue (y[7])
     dy[7] =
-      bp.QGt * (y[6] / (bp.VLv * P.Lv) - y[7] / (bp.VGt * P.Gt)) +
+      bp.QGt * (cPl - y[7] / (bp.VGt * P.Gt)) +
       rates.kAbs * y[8] -
       rates.kEx * y[7] / (bp.VGt * P.Gt);
 
