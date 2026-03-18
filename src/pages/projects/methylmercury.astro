@@ -1,6 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmercury-model';
+import {
+  BODY_TYPES,
+  FISH_SPECIES,
+  getDefaultRatesForBodyType,
+} from '../../scripts/methylmercury-model';
+
+const defaultRates = getDefaultRatesForBodyType(1);
 ---
 
 <BaseLayout title="Methylmercury Model | Quintin Pope">
@@ -8,9 +14,9 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
     <a href="/projects" class="back-link">&larr; Projects</a>
     <h1>Methylmercury Burden Estimator</h1>
     <p class="project-desc">
-      Interactive multicompartment pharmacokinetic model of methylmercury distribution
-      and elimination in humans. Based on
-      <a href="https://doi.org/10.1093/toxsci/kfaa192" target="_blank" rel="noopener">Pope & Rand, 2021</a>.
+      Interactive human PBPK model using the paper’s 17-equation formulation for methylmercury
+      distribution, enterohepatic cycling, demethylation, fecal elimination, and hair loss. Based on
+      <a href="https://doi.org/10.1093/toxsci/kfaa192" target="_blank" rel="noopener">Pope &amp; Rand, 2021</a>.
     </p>
   </div>
 
@@ -48,7 +54,7 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
       </div>
 
       <div class="control-group">
-        <label for="mealSize">Meal Size (per week)</label>
+        <label for="mealSize">Meal Size (once per week)</label>
         <div class="input-row">
           <input type="number" id="mealSize" value="170" min="1" max="5000" step="1" />
           <select id="mealUnit">
@@ -59,31 +65,48 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
       </div>
 
       <details class="advanced-toggle">
-        <summary>Advanced: Kinetic Constants</summary>
+        <summary>Advanced: Table 1 kinetic parameters</summary>
         <div class="advanced-params">
+          <p class="advanced-note">
+            These are the paper’s reference-rate values. The model then applies the paper’s allometric
+            scaling rules to the selected body weight.
+          </p>
+
           <div class="control-group">
-            <label for="KFe">KFe <span class="param-desc">(fecal excretion)</span></label>
-            <input type="number" id="KFe" value={DEFAULT_RATES.KFe} step="0.001" />
+            <label for="kAbs">kAbs <span class="param-desc">(gut lumen → gut tissue, h⁻¹)</span></label>
+            <input type="number" id="kAbs" value={defaultRates.kAbs} step="0.001" />
           </div>
           <div class="control-group">
-            <label for="KBi">KBi <span class="param-desc">(biliary excretion)</span></label>
-            <input type="number" id="KBi" value={DEFAULT_RATES.KBi} step="0.01" />
+            <label for="kEx">kEx <span class="param-desc">(gut tissue → lumen, h⁻¹)</span></label>
+            <input type="number" id="kEx" value={defaultRates.kEx} step="0.001" />
           </div>
           <div class="control-group">
-            <label for="kGLI">kGLI <span class="param-desc">(GI demethylation)</span></label>
-            <input type="number" id="kGLI" value={DEFAULT_RATES.kGLI} step="0.001" />
+            <label for="kGLI">kGLI <span class="param-desc">(gut lumen demethylation, h⁻¹)</span></label>
+            <input type="number" id="kGLI" value={defaultRates.kGLI} step="0.001" />
           </div>
           <div class="control-group">
-            <label for="kEx">kEx <span class="param-desc">(gut excretion)</span></label>
-            <input type="number" id="kEx" value={DEFAULT_RATES.kEx} step="0.01" />
+            <label for="kLvI">kLvI <span class="param-desc">(liver demethylation, h⁻¹)</span></label>
+            <input type="number" id="kLvI" value={defaultRates.kLvI} step="0.0001" />
           </div>
           <div class="control-group">
-            <label for="kLvI">kLvI <span class="param-desc">(liver clearance)</span></label>
-            <input type="number" id="kLvI" value={DEFAULT_RATES.kLvI} step="0.0001" />
+            <label for="KBi">KBi <span class="param-desc">(biliary clearance, L/h/g liver)</span></label>
+            <input type="number" id="KBi" value={defaultRates.KBi} step="0.00001" />
           </div>
           <div class="control-group">
-            <label for="kAbs">kAbs <span class="param-desc">(absorption rate)</span></label>
-            <input type="number" id="kAbs" value={DEFAULT_RATES.kAbs} step="0.01" />
+            <label for="KFe">KFe <span class="param-desc">(fecal flow, L/h)</span></label>
+            <input type="number" id="KFe" value={defaultRates.KFe} step="0.0001" />
+          </div>
+          <div class="control-group">
+            <label for="KHa">KHa <span class="param-desc">(hair flow, L/h)</span></label>
+            <input type="number" id="KHa" value={defaultRates.KHa} step="0.000001" />
+          </div>
+          <div class="control-group">
+            <label for="kPlR">kPlR <span class="param-desc">(plasma → RBC, h⁻¹)</span></label>
+            <input type="number" id="kPlR" value={defaultRates.kPlR} step="0.01" />
+          </div>
+          <div class="control-group">
+            <label for="kRPl">kRPl <span class="param-desc">(RBC → plasma, h⁻¹)</span></label>
+            <input type="number" id="kRPl" value={defaultRates.kRPl} step="0.01" />
           </div>
         </div>
       </details>
@@ -92,15 +115,19 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
 
       <div id="results-summary" class="results-summary" style="display:none;">
         <div class="stat">
-          <span class="stat-label">Half-life</span>
+          <span class="stat-label">Single-dose t½</span>
           <span class="stat-value" id="halflife">—</span>
         </div>
         <div class="stat">
-          <span class="stat-label">Eq. Time</span>
+          <span class="stat-label">95% Steady State</span>
           <span class="stat-value" id="eqtime">—</span>
         </div>
         <div class="stat">
-          <span class="stat-label">Peak Blood</span>
+          <span class="stat-label">Final Week Avg Blood</span>
+          <span class="stat-value" id="steadyblood">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Single-dose Peak Blood</span>
           <span class="stat-value" id="peakblood">—</span>
         </div>
       </div>
@@ -111,8 +138,19 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
         <canvas id="mainChart"></canvas>
       </div>
       <p class="chart-note" id="chartNote">
-        Configure parameters and click "Run Simulation" to see results.
+        Configure parameters and click "Run Simulation" to see the 52-week repeated-dose trajectory.
       </p>
+
+      <div id="paperSummary" class="paper-summary" style="display:none;">
+        <div class="paper-card">
+          <h4>50-day single-dose elimination split</h4>
+          <p id="routeSummary">—</p>
+        </div>
+        <div class="paper-card">
+          <h4>Mass-balance check</h4>
+          <p id="massBalanceSummary">—</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -120,46 +158,64 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
     <h2 class="section-title">About the Model</h2>
     <div class="info-grid">
       <div class="card">
-        <h3>Compartments</h3>
-        <p>The model tracks methylmercury across 11 body compartments: plasma, red blood cells,
-        brain, kidney, liver, gut tissue, gut lumen, skeletal muscle, fat,
-        richly-perfused tissues, and slowly-perfused tissues.</p>
+        <h3>Compartments and States</h3>
+        <p>
+          The paper model uses 11 physiological methylmercury compartments plus 6 cumulative
+          bookkeeping states. Those extra states track biliary transfer, gut-tissue return to the lumen,
+          gut-lumen demethylation, liver demethylation, fecal loss, and hair loss.
+        </p>
       </div>
       <div class="card">
         <h3>Dynamics</h3>
-        <p>13 coupled ordinary differential equations model flow-limited distribution
-        using allometric scaling. Weekly fish consumption provides periodic mercury dosing
-        with exponential GI absorption.</p>
+        <p>
+          This version uses the paper’s plasma-only perfusion flows, separate RBC exchange,
+          portal routing from gut to liver, and a 1-hour zero-order oral input to the gut lumen
+          for each weekly meal.
+        </p>
       </div>
       <div class="card">
-        <h3>Key Findings</h3>
-        <p>The model highlights the importance of gut biotransformation and enterohepatic
-        cycling in determining methylmercury elimination rates, with skeletal muscle
-        serving as the primary storage compartment.</p>
+        <h3>Mass Balance</h3>
+        <p>
+          The solver preserves the paper’s mercury ledger: dose equals methylmercury remaining in the
+          body plus cumulative demethylated mercury plus cumulative hair and fecal loss, up to numerical error.
+        </p>
       </div>
     </div>
   </section>
 </BaseLayout>
 
 <script>
-  import { runSimulation, DEFAULT_RATES } from '../../scripts/methylmercury-model';
+  import { runSimulation, getDefaultRatesForBodyType } from '../../scripts/methylmercury-model';
   import Chart from 'chart.js/auto';
 
-  let chart: Chart | null = null;
+  let chart = null;
+
+  const ADVANCED_IDS = ['kAbs', 'kEx', 'kGLI', 'kLvI', 'KBi', 'KFe', 'KHa', 'kPlR', 'kRPl'] as const;
+  type AdvancedId = typeof ADVANCED_IDS[number];
+
+  function applyBodyTypeDefaults() {
+    const bodyType = parseInt((document.getElementById('bodyType') as HTMLSelectElement).value, 10);
+    const defaults = getDefaultRatesForBodyType(bodyType);
+
+    for (const id of ADVANCED_IDS) {
+      const el = document.getElementById(id) as HTMLInputElement | null;
+      if (!el) continue;
+      el.value = String(defaults[id as AdvancedId]);
+    }
+  }
 
   function getInputs() {
     const weightRaw = parseFloat((document.getElementById('weight') as HTMLInputElement).value);
     const weightUnit = parseFloat((document.getElementById('weightUnit') as HTMLSelectElement).value);
-    const bodyType = parseInt((document.getElementById('bodyType') as HTMLSelectElement).value);
+    const bodyType = parseInt((document.getElementById('bodyType') as HTMLSelectElement).value, 10);
     const fishPpm = parseFloat((document.getElementById('fishType') as HTMLSelectElement).value);
     const mealRaw = parseFloat((document.getElementById('mealSize') as HTMLInputElement).value);
     const mealUnit = parseFloat((document.getElementById('mealUnit') as HTMLSelectElement).value);
 
-    const rates = { ...DEFAULT_RATES };
-    const advancedIds = ['KFe', 'KBi', 'kGLI', 'kEx', 'kLvI', 'kAbs'] as const;
-    for (const id of advancedIds) {
-      const el = document.getElementById(id) as HTMLInputElement;
-      if (el) rates[id] = parseFloat(el.value);
+    const rates = getDefaultRatesForBodyType(bodyType);
+    for (const id of ADVANCED_IDS) {
+      const el = document.getElementById(id) as HTMLInputElement | null;
+      if (el) rates[id as AdvancedId] = parseFloat(el.value);
     }
 
     return {
@@ -172,7 +228,8 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
   }
 
   function updateChart(result: ReturnType<typeof runSimulation>) {
-    const ctx = (document.getElementById('mainChart') as HTMLCanvasElement).getContext('2d')!;
+    const ctx = (document.getElementById('mainChart') as HTMLCanvasElement).getContext('2d');
+    if (!ctx) return;
 
     if (chart) chart.destroy();
 
@@ -185,7 +242,7 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
             label: 'Blood (µg/L)',
             data: result.bloodConc,
             borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+            backgroundColor: 'rgba(56, 189, 248, 0.10)',
             fill: true,
             tension: 0.3,
             pointRadius: 0,
@@ -195,7 +252,7 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
             label: 'Brain (µg/L)',
             data: result.brainConc,
             borderColor: '#f472b6',
-            backgroundColor: 'rgba(244, 114, 182, 0.1)',
+            backgroundColor: 'rgba(244, 114, 182, 0.08)',
             fill: true,
             tension: 0.3,
             pointRadius: 0,
@@ -205,7 +262,7 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
             label: 'Muscle (µg/L)',
             data: result.muscleConc,
             borderColor: '#a78bfa',
-            backgroundColor: 'rgba(167, 139, 250, 0.1)',
+            backgroundColor: 'rgba(167, 139, 250, 0.08)',
             fill: true,
             tension: 0.3,
             pointRadius: 0,
@@ -232,14 +289,14 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
             borderWidth: 1,
             callbacks: {
               title: (items) => `Day ${items[0].label}`,
-              label: (item) => `${item.dataset.label}: ${(item.raw as number).toFixed(3)} µg/L`,
+              label: (item) => `${item.dataset.label}: ${(item.raw as number).toFixed(3)}`,
             },
           },
         },
         scales: {
           x: {
             title: { display: true, text: 'Time (days)', color: '#94a3b8' },
-            ticks: { color: '#94a3b8', maxTicksLimit: 10 },
+            ticks: { color: '#94a3b8', maxTicksLimit: 12 },
             grid: { color: 'rgba(51, 65, 85, 0.5)' },
           },
           y: {
@@ -253,25 +310,47 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
     });
   }
 
+  function formatPct(value: number) {
+    return `${value.toFixed(1)}%`;
+  }
+
   function run() {
     const inputs = getInputs();
     const result = runSimulation(inputs);
 
     updateChart(result);
 
-    const summary = document.getElementById('results-summary')!;
+    const summary = document.getElementById('results-summary') as HTMLDivElement;
     summary.style.display = 'flex';
-    document.getElementById('halflife')!.textContent = `${result.halfLifeDays} days`;
-    document.getElementById('eqtime')!.textContent = `${result.eqTimeDays} days`;
-    const peak = Math.max(...result.bloodConc);
-    document.getElementById('peakblood')!.textContent = `${peak.toFixed(3)} µg/L`;
-    document.getElementById('chartNote')!.textContent =
-      'Showing methylmercury concentrations over time with weekly fish consumption.';
+
+    (document.getElementById('halflife') as HTMLSpanElement).textContent = `${result.halfLifeDays} days`;
+    (document.getElementById('eqtime') as HTMLSpanElement).textContent = `${result.eqTimeDays} days`;
+    (document.getElementById('steadyblood') as HTMLSpanElement).textContent = `${result.steadyStateBloodConc.toFixed(3)} µg/L`;
+    (document.getElementById('peakblood') as HTMLSpanElement).textContent = `${result.peakBloodConc.toFixed(3)} µg/L`;
+
+    const route = result.elimination50d;
+    (document.getElementById('routeSummary') as HTMLParagraphElement).innerHTML =
+      `Gut demethylation <strong>${formatPct(route.gutDemethylationPctDose)}</strong> of dose ` +
+      `(${formatPct(route.gutDemethylationPctEliminated)} of eliminated Hg), ` +
+      `hair <strong>${formatPct(route.hairPctDose)}</strong>, ` +
+      `liver demethylation <strong>${formatPct(route.liverDemethylationPctDose)}</strong>, ` +
+      `and feces <strong>${formatPct(route.fecesPctDose)}</strong>.`;
+
+    (document.getElementById('massBalanceSummary') as HTMLParagraphElement).textContent =
+      `Maximum absolute ledger error across the repeated-dose run: ${result.maxAbsMassBalanceErrorUg.toExponential(2)} µg.`;
+
+    (document.getElementById('paperSummary') as HTMLDivElement).style.display = 'grid';
+    (document.getElementById('chartNote') as HTMLParagraphElement).textContent =
+      'Showing the 52-week repeated-dose trajectory. Each weekly meal is modeled as a 1-hour zero-order input to the gut lumen.';
   }
 
-  document.getElementById('runBtn')!.addEventListener('click', run);
+  document.getElementById('runBtn')?.addEventListener('click', run);
+  document.getElementById('bodyType')?.addEventListener('change', () => {
+    applyBodyTypeDefaults();
+    run();
+  });
 
-  // Run on load with defaults
+  applyBodyTypeDefaults();
   run();
 </script>
 
@@ -288,17 +367,17 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
 
   .project-desc {
     color: var(--color-text-muted);
-    max-width: 650px;
+    max-width: 760px;
   }
 
   .model-layout {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 320px 1fr;
     gap: 1.5rem;
     margin-bottom: 3rem;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     .model-layout {
       grid-template-columns: 1fr;
     }
@@ -318,7 +397,7 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
   }
 
   .control-group {
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.85rem;
   }
 
   .control-group label {
@@ -332,6 +411,12 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
   .param-desc {
     font-weight: 400;
     font-size: 0.75rem;
+  }
+
+  .advanced-note {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    margin: 0 0 0.9rem;
   }
 
   .input-row {
@@ -412,13 +497,13 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
   }
 
   .stat {
-    flex: 1;
-    min-width: 80px;
+    flex: 1 1 120px;
+    min-width: 110px;
   }
 
   .stat-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -448,6 +533,33 @@ import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmer
     color: var(--color-text-muted);
     margin-top: 0.8rem;
     text-align: center;
+  }
+
+  .paper-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .paper-card {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.35);
+  }
+
+  .paper-card h4 {
+    margin: 0 0 0.45rem;
+    color: var(--color-accent);
+    font-size: 0.95rem;
+  }
+
+  .paper-card p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+    line-height: 1.45;
   }
 
   .info-grid {
