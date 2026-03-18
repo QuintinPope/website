@@ -1,0 +1,56 @@
+---
+const publications = [
+  {
+    title: "Neural Networks Learn Statistics of Increasing Complexity",
+    authors: "Nora Belrose, Quintin Pope, Lucia Quirke, Alex Troy Mallen, Xiaoli Fern",
+    venue: "International Conference on Machine Learning (ICML), 2024",
+    links: [{ label: "Paper", url: "https://proceedings.mlr.press/v235/belrose24a.html" }],
+  },
+  {
+    title: "Learning a Deep Language Model for Microbiomes",
+    authors: "Quintin Pope, Rohan Varma, Christine Tataru, Maude M. David, Xiaoli Fern",
+    venue: "PLOS Computational Biology, 2025",
+    links: [
+      { label: "Paper", url: "https://doi.org/10.1371/journal.pcbi.1011353" },
+      { label: "GitHub", url: "https://github.com/QuintinPope/microbiome_transformers" },
+    ],
+  },
+  {
+    title: "Revealing General Patterns of Microbiomes That Transcend Systems",
+    authors: "Maude M. David, Christine Tataru, Quintin Pope, et al.",
+    venue: "mSystems, 2022",
+    links: [{ label: "Paper", url: "https://doi.org/10.1128/msystems.01058-21" }],
+  },
+  {
+    title: "Text Counterfactuals via Latent Optimization and Shapley-Guided Search",
+    authors: "Quintin Pope, Xiaoli Fern",
+    venue: "EMNLP, 2021",
+    links: [
+      { label: "Paper", url: "https://aclanthology.org/2021.emnlp-main.452" },
+      { label: "GitHub", url: "https://github.com/QuintinPope/CLOSS" },
+    ],
+  },
+  {
+    title: "Variation in Methylmercury Metabolism and Elimination in Humans",
+    authors: "Quintin Pope, Matthew D. Rand",
+    venue: "Toxicological Sciences, 2021",
+    links: [{ label: "Paper", url: "https://doi.org/10.1093/toxsci/kfaa192" }],
+  },
+];
+---
+
+<section class="section">
+  <h2 class="section-title">Select Publications</h2>
+  {publications.map((pub) => (
+    <div class="card">
+      <div class="pub-title">{pub.title}</div>
+      <div class="pub-authors">{pub.authors}</div>
+      <div class="pub-venue">{pub.venue}</div>
+      <div class="pub-links">
+        {pub.links.map((link) => (
+          <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+        ))}
+      </div>
+    </div>
+  ))}
+</section>

@@ -1,0 +1,130 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const projects = [
+  {
+    title: "Methylmercury Multicompartment Model",
+    slug: "methylmercury",
+    description: "Interactive physiological pharmacokinetic model of methylmercury elimination in humans. Run simulations with custom parameters via an in-browser GUI.",
+    tags: ["JavaScript", "Pharmacokinetics", "Interactive", "Modeling"],
+    links: [
+      { label: "Interactive Demo", url: "/projects/methylmercury" },
+      { label: "Paper", url: "https://doi.org/10.1093/toxsci/kfaa192" },
+      { label: "GitHub", url: "https://github.com/QuintinPope/methylmercury-website" },
+    ],
+    featured: true,
+  },
+  {
+    title: "Supervising AIs Improving AIs",
+    slug: null,
+    description: "Automated tools to understand unintended side-effects of interventions on language models. Discovered that knowledge editing can degrade alignment.",
+    tags: ["Python", "PyTorch", "LLMs", "AI Safety"],
+    links: [
+      { label: "GitHub", url: "https://github.com/JayThibs/supervising-ais-improving-ais" },
+    ],
+    featured: false,
+  },
+  {
+    title: "CLOSS: Text Counterfactuals",
+    slug: null,
+    description: "Counterfactual Latent Optimization via Shapley-guided Search. Generates counterfactual inputs to interpret deep NLP classifiers.",
+    tags: ["Python", "PyTorch", "NLP", "Interpretability"],
+    links: [
+      { label: "Paper", url: "https://aclanthology.org/2021.emnlp-main.452" },
+      { label: "GitHub", url: "https://github.com/QuintinPope/CLOSS" },
+    ],
+    featured: false,
+  },
+  {
+    title: "Microbiome Transformers",
+    slug: null,
+    description: "Applying NLP techniques to microbiome taxa data. Trained context-sensitive microbiome embeddings with superior disease predictivity.",
+    tags: ["Python", "PyTorch", "NLP", "Biology"],
+    links: [
+      { label: "Paper", url: "https://doi.org/10.1371/journal.pcbi.1011353" },
+      { label: "GitHub", url: "https://github.com/QuintinPope/microbiome_transformers" },
+    ],
+    featured: false,
+  },
+];
+---
+
+<BaseLayout title="Projects | Quintin Pope">
+  <h1 class="page-title">Projects</h1>
+  <p class="page-subtitle">Research projects and interactive demos.</p>
+
+  <div class="projects-grid">
+    {projects.map((project) => (
+      <div class:list={["card", "project-card", { featured: project.featured }]}>
+        {project.featured && <span class="featured-badge">Interactive Demo</span>}
+        <h3 class="project-title">{project.title}</h3>
+        <p class="project-desc">{project.description}</p>
+        <div class="tags">
+          {project.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+        <div class="project-links">
+          {project.links.map((link) => (
+            <a href={link.url} target={link.url.startsWith("/") ? undefined : "_blank"} rel={link.url.startsWith("/") ? undefined : "noopener"}>
+              {link.label} &rarr;
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-title {
+    margin-bottom: 0.3rem;
+  }
+
+  .page-subtitle {
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .project-card {
+    position: relative;
+  }
+
+  .project-card.featured {
+    border-color: var(--color-accent);
+    background: linear-gradient(135deg, var(--color-bg-card) 0%, rgba(56, 189, 248, 0.05) 100%);
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  .project-title {
+    margin-bottom: 0.5rem;
+  }
+
+  .project-desc {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+</style>

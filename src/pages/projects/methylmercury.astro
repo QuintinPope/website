@@ -1,0 +1,469 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { FISH_SPECIES, BODY_TYPES, DEFAULT_RATES } from '../../scripts/methylmercury-model';
+---
+
+<BaseLayout title="Methylmercury Model | Quintin Pope">
+  <div class="project-header">
+    <a href="/projects" class="back-link">&larr; Projects</a>
+    <h1>Methylmercury Burden Estimator</h1>
+    <p class="project-desc">
+      Interactive multicompartment pharmacokinetic model of methylmercury distribution
+      and elimination in humans. Based on
+      <a href="https://doi.org/10.1093/toxsci/kfaa192" target="_blank" rel="noopener">Pope & Rand, 2021</a>.
+    </p>
+  </div>
+
+  <div class="model-layout">
+    <div class="controls-panel">
+      <h3>Parameters</h3>
+
+      <div class="control-group">
+        <label for="weight">Body Weight</label>
+        <div class="input-row">
+          <input type="number" id="weight" value="70" min="1" max="500" step="1" />
+          <select id="weightUnit">
+            <option value="1">kg</option>
+            <option value="0.453592">lbs</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="bodyType">Body Type</label>
+        <select id="bodyType">
+          {BODY_TYPES.map((bt) => (
+            <option value={bt.value} selected={bt.value === 1}>{bt.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="fishType">Fish Species</label>
+        <select id="fishType">
+          {FISH_SPECIES.map((f) => (
+            <option value={f.ppm}>{f.name} ({f.ppm} ppm)</option>
+          ))}
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="mealSize">Meal Size (per week)</label>
+        <div class="input-row">
+          <input type="number" id="mealSize" value="170" min="1" max="5000" step="1" />
+          <select id="mealUnit">
+            <option value="1">grams</option>
+            <option value="28.3495">oz</option>
+          </select>
+        </div>
+      </div>
+
+      <details class="advanced-toggle">
+        <summary>Advanced: Kinetic Constants</summary>
+        <div class="advanced-params">
+          <div class="control-group">
+            <label for="KFe">KFe <span class="param-desc">(fecal excretion)</span></label>
+            <input type="number" id="KFe" value={DEFAULT_RATES.KFe} step="0.001" />
+          </div>
+          <div class="control-group">
+            <label for="KBi">KBi <span class="param-desc">(biliary excretion)</span></label>
+            <input type="number" id="KBi" value={DEFAULT_RATES.KBi} step="0.01" />
+          </div>
+          <div class="control-group">
+            <label for="kGLI">kGLI <span class="param-desc">(GI demethylation)</span></label>
+            <input type="number" id="kGLI" value={DEFAULT_RATES.kGLI} step="0.001" />
+          </div>
+          <div class="control-group">
+            <label for="kEx">kEx <span class="param-desc">(gut excretion)</span></label>
+            <input type="number" id="kEx" value={DEFAULT_RATES.kEx} step="0.01" />
+          </div>
+          <div class="control-group">
+            <label for="kLvI">kLvI <span class="param-desc">(liver clearance)</span></label>
+            <input type="number" id="kLvI" value={DEFAULT_RATES.kLvI} step="0.0001" />
+          </div>
+          <div class="control-group">
+            <label for="kAbs">kAbs <span class="param-desc">(absorption rate)</span></label>
+            <input type="number" id="kAbs" value={DEFAULT_RATES.kAbs} step="0.01" />
+          </div>
+        </div>
+      </details>
+
+      <button id="runBtn" class="run-btn">Run Simulation</button>
+
+      <div id="results-summary" class="results-summary" style="display:none;">
+        <div class="stat">
+          <span class="stat-label">Half-life</span>
+          <span class="stat-value" id="halflife">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Eq. Time</span>
+          <span class="stat-value" id="eqtime">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Peak Blood</span>
+          <span class="stat-value" id="peakblood">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+      <p class="chart-note" id="chartNote">
+        Configure parameters and click "Run Simulation" to see results.
+      </p>
+    </div>
+  </div>
+
+  <section class="model-info section">
+    <h2 class="section-title">About the Model</h2>
+    <div class="info-grid">
+      <div class="card">
+        <h3>Compartments</h3>
+        <p>The model tracks methylmercury across 11 body compartments: plasma, red blood cells,
+        brain, kidney, liver, gut tissue, gut lumen, skeletal muscle, fat,
+        richly-perfused tissues, and slowly-perfused tissues.</p>
+      </div>
+      <div class="card">
+        <h3>Dynamics</h3>
+        <p>13 coupled ordinary differential equations model flow-limited distribution
+        using allometric scaling. Weekly fish consumption provides periodic mercury dosing
+        with exponential GI absorption.</p>
+      </div>
+      <div class="card">
+        <h3>Key Findings</h3>
+        <p>The model highlights the importance of gut biotransformation and enterohepatic
+        cycling in determining methylmercury elimination rates, with skeletal muscle
+        serving as the primary storage compartment.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { runSimulation, DEFAULT_RATES } from '../../scripts/methylmercury-model';
+  import Chart from 'chart.js/auto';
+
+  let chart: Chart | null = null;
+
+  function getInputs() {
+    const weightRaw = parseFloat((document.getElementById('weight') as HTMLInputElement).value);
+    const weightUnit = parseFloat((document.getElementById('weightUnit') as HTMLSelectElement).value);
+    const bodyType = parseInt((document.getElementById('bodyType') as HTMLSelectElement).value);
+    const fishPpm = parseFloat((document.getElementById('fishType') as HTMLSelectElement).value);
+    const mealRaw = parseFloat((document.getElementById('mealSize') as HTMLInputElement).value);
+    const mealUnit = parseFloat((document.getElementById('mealUnit') as HTMLSelectElement).value);
+
+    const rates = { ...DEFAULT_RATES };
+    const advancedIds = ['KFe', 'KBi', 'kGLI', 'kEx', 'kLvI', 'kAbs'] as const;
+    for (const id of advancedIds) {
+      const el = document.getElementById(id) as HTMLInputElement;
+      if (el) rates[id] = parseFloat(el.value);
+    }
+
+    return {
+      weightKg: weightRaw * weightUnit,
+      bodyType,
+      fishPpm,
+      mealSizeG: mealRaw * mealUnit,
+      rates,
+    };
+  }
+
+  function updateChart(result: ReturnType<typeof runSimulation>) {
+    const ctx = (document.getElementById('mainChart') as HTMLCanvasElement).getContext('2d')!;
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: result.timeDays,
+        datasets: [
+          {
+            label: 'Blood (µg/L)',
+            data: result.bloodConc,
+            borderColor: '#38bdf8',
+            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            label: 'Brain (µg/L)',
+            data: result.brainConc,
+            borderColor: '#f472b6',
+            backgroundColor: 'rgba(244, 114, 182, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+          {
+            label: 'Muscle (µg/L)',
+            data: result.muscleConc,
+            borderColor: '#a78bfa',
+            backgroundColor: 'rgba(167, 139, 250, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            labels: { color: '#e2e8f0', font: { size: 13 } },
+          },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#e2e8f0',
+            bodyColor: '#94a3b8',
+            borderColor: '#334155',
+            borderWidth: 1,
+            callbacks: {
+              title: (items) => `Day ${items[0].label}`,
+              label: (item) => `${item.dataset.label}: ${(item.raw as number).toFixed(3)} µg/L`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Time (days)', color: '#94a3b8' },
+            ticks: { color: '#94a3b8', maxTicksLimit: 10 },
+            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+          },
+          y: {
+            title: { display: true, text: 'Concentration (µg/L)', color: '#94a3b8' },
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+
+  function run() {
+    const inputs = getInputs();
+    const result = runSimulation(inputs);
+
+    updateChart(result);
+
+    const summary = document.getElementById('results-summary')!;
+    summary.style.display = 'flex';
+    document.getElementById('halflife')!.textContent = `${result.halfLifeDays} days`;
+    document.getElementById('eqtime')!.textContent = `${result.eqTimeDays} days`;
+    const peak = Math.max(...result.bloodConc);
+    document.getElementById('peakblood')!.textContent = `${peak.toFixed(3)} µg/L`;
+    document.getElementById('chartNote')!.textContent =
+      'Showing methylmercury concentrations over time with weekly fish consumption.';
+  }
+
+  document.getElementById('runBtn')!.addEventListener('click', run);
+
+  // Run on load with defaults
+  run();
+</script>
+
+<style>
+  .project-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-desc {
+    color: var(--color-text-muted);
+    max-width: 650px;
+  }
+
+  .model-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    .model-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .controls-panel {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    height: fit-content;
+  }
+
+  .controls-panel h3 {
+    margin-bottom: 1rem;
+    color: var(--color-accent);
+  }
+
+  .control-group {
+    margin-bottom: 0.8rem;
+  }
+
+  .control-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .param-desc {
+    font-weight: 400;
+    font-size: 0.75rem;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  input[type="number"],
+  select {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: var(--color-text);
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    width: 100%;
+    font-family: var(--font-mono);
+  }
+
+  input[type="number"]:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .input-row select {
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .advanced-toggle {
+    margin: 1rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.5rem;
+  }
+
+  .advanced-toggle summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .advanced-params {
+    margin-top: 0.8rem;
+  }
+
+  .advanced-params input {
+    font-size: 0.8rem;
+  }
+
+  .run-btn {
+    width: 100%;
+    padding: 0.6rem;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+
+  .run-btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .results-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .stat {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-accent);
+    font-size: 0.95rem;
+  }
+
+  .chart-panel {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 400px;
+  }
+
+  .chart-note {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 0.8rem;
+    text-align: center;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .info-grid .card h3 {
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .info-grid .card p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+</style>

@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const writings = [
+  {
+    title: "Evolution Provides No Evidence for the Sharp Left Turn",
+    platform: "LessWrong",
+    date: "2023",
+    description: "First-place submission to the Open Philanthropy AI Worldviews Contest. Argues that evolutionary analogies do not support predictions of a discontinuous capability jump in AI systems.",
+    url: "https://www.lesswrong.com/posts/hvz9qjWyv8cLX9JJR/evolution-provides-no-evidence-for-the-sharp-left-turn",
+    tags: ["AI Safety", "AI Worldviews", "Award-winning"],
+  },
+  {
+    title: "Quintin's Alignment Papers Roundup",
+    platform: "LessWrong",
+    date: "2022",
+    description: "A series of reviews covering AI safety and alignment-relevant papers, published during the MATS Summer Program at Stanford.",
+    url: "https://www.lesswrong.com/s/5omSW4wNKbEvYsyje",
+    tags: ["AI Safety", "Paper Reviews", "MATS"],
+  },
+];
+
+const interviews = [
+  {
+    title: "AXRP Podcast — Episode 22: Shard Theory",
+    date: "2023",
+    description: "Discussion on shard theory and AI safety on the AXRP podcast.",
+    url: "https://axrp.net/episode/2023/06/15/episode-22-shard-theory-quintin-pope.html",
+  },
+  {
+    title: "The Conscience of AI",
+    date: "2023",
+    description: "Interview for Oregon State Engineering on the future of AI development.",
+    url: "https://engineering.oregonstate.edu/all-stories/conscience-ai",
+  },
+];
+---
+
+<BaseLayout title="Writings | Quintin Pope">
+  <h1 class="page-title">Writings</h1>
+  <p class="page-subtitle">Essays, paper reviews, and interviews.</p>
+
+  <section class="section">
+    <h2 class="section-title">Essays & Reviews</h2>
+    {writings.map((w) => (
+      <a href={w.url} target="_blank" rel="noopener" class="writing-link">
+        <div class="card writing-card">
+          <div class="writing-meta">
+            <span class="tag">{w.platform}</span>
+            <span class="timeline-date">{w.date}</span>
+          </div>
+          <h3 class="writing-title">{w.title}</h3>
+          <p class="writing-desc">{w.description}</p>
+          <div class="tags">
+            {w.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        </div>
+      </a>
+    ))}
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">Interviews & Media</h2>
+    {interviews.map((i) => (
+      <a href={i.url} target="_blank" rel="noopener" class="writing-link">
+        <div class="card writing-card">
+          <div class="writing-meta">
+            <span class="timeline-date">{i.date}</span>
+          </div>
+          <h3 class="writing-title">{i.title}</h3>
+          <p class="writing-desc">{i.description}</p>
+        </div>
+      </a>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .page-title {
+    margin-bottom: 0.3rem;
+  }
+
+  .page-subtitle {
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .writing-link {
+    display: block;
+    color: inherit;
+  }
+
+  .writing-link:hover {
+    color: inherit;
+  }
+
+  .writing-card {
+    cursor: pointer;
+  }
+
+  .writing-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .writing-title {
+    margin-bottom: 0.3rem;
+  }
+
+  .writing-desc {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+</style>
