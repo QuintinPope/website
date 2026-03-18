@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
   "dependencies": {
     "astro": "^6.0.5",
     "chart.js": "^4.5.1"
