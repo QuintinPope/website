@@ -1,0 +1,119 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Quintin Pope - ML Researcher" } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="container nav-inner">
+        <a href="/" class="nav-logo">QP</a>
+        <div class="nav-links">
+          <a href="/" class:list={["nav-link", { active: currentPath === "/" }]}>Home</a>
+          <a href="/projects" class:list={["nav-link", { active: currentPath.startsWith("/projects") }]}>Projects</a>
+          <a href="/writings" class:list={["nav-link", { active: currentPath.startsWith("/writings") }]}>Writings</a>
+        </div>
+      </div>
+    </nav>
+    <main class="container main-content">
+      <slot />
+    </main>
+    <footer class="footer">
+      <div class="container footer-inner">
+        <p>&copy; {new Date().getFullYear()} Quintin Pope</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>
+
+<style>
+  .nav {
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3.5rem;
+  }
+
+  .nav-logo {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color var(--transition);
+    position: relative;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--color-accent);
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.9rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-accent);
+  }
+
+  .main-content {
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+    min-height: calc(100vh - 3.5rem - 4rem);
+  }
+
+  .footer {
+    border-top: 1px solid var(--color-border);
+    padding: 1rem 0;
+  }
+
+  .footer-inner {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+</style>

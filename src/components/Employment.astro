@@ -1,0 +1,74 @@
+---
+const jobs = [
+  {
+    period: "2020 – 2025",
+    title: "Graduate Research Assistant",
+    org: "Oregon State University",
+    items: [
+      'Developed <a href="https://github.com/JayThibs/supervising-ais-improving-ais" target="_blank">automated tools</a> to understand unintended side-effects of interventions on language models.',
+      "Discovered knowledge editing can degrade alignment; unlearning can promote vague, anecdote-driven and error-filled response patterns.",
+      'Adapted adversarial NLP research to generate counterfactual inputs for deep classifiers (<a href="https://aclanthology.org/2021.emnlp-main.452/" target="_blank">Paper</a>, <a href="https://github.com/QuintinPope/CLOSS" target="_blank">GitHub</a>).',
+      "Showed how LLMs used shallow, word-overlap-based shortcuts to infer logical entailment.",
+      'Applied NLP techniques to microbiome taxa data (<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011353" target="_blank">Paper</a>, <a href="https://github.com/QuintinPope/microbiome_transformers" target="_blank">GitHub</a>).',
+      "Trained context-sensitive microbiome embeddings with superior disease predictivity and correlation with known metabolic pathways.",
+      "Mentored undergraduate and graduate students on microbiome NLP research.",
+    ],
+  },
+  {
+    period: "2023",
+    title: "Research Fellow",
+    org: "Cavendish Labs, VT",
+    items: [
+      "Studied contrastive analysis of LLMs and applications of deep learning theory to out-of-domain generalization.",
+    ],
+  },
+  {
+    period: "2022",
+    title: "Research Scholar",
+    org: "Stanford Existential Risk Initiative (MATS)",
+    items: [
+      "Attended a summer-long intensive study program on AI safety research.",
+      'Published <a href="https://www.lesswrong.com/s/5omSW4wNKbEvYsyje" target="_blank">Quintin\'s Alignment Papers Roundup</a>, a series of reviews on AI safety and alignment-relevant papers.',
+      "Delivered a talk on counterintuitive phenomena in the dynamics of deep learning.",
+    ],
+  },
+  {
+    period: "2019",
+    title: "Graduate Teaching Assistant",
+    org: "Oregon State University",
+    items: [
+      "TA for CS 321 (Intro to Theory of Computation).",
+      "Provided one-on-one and group instruction during weekly office hours.",
+    ],
+  },
+  {
+    period: "2016 – 2019",
+    title: "Undergraduate Student Researcher",
+    org: "University of Rochester",
+    items: [
+      "Developed models of methylmercury elimination in humans using Mathematica.",
+      "Used gradient-free optimization to fit model parameters to human data.",
+      'Re-implemented model in JavaScript and made it available via <a href="/projects/methylmercury">interactive website</a>.',
+    ],
+  },
+];
+---
+
+<section class="section">
+  <h2 class="section-title">Employment</h2>
+  <div class="timeline">
+    {jobs.map((job) => (
+      <div class="timeline-item">
+        <div class="timeline-date">{job.period}</div>
+        <div class="timeline-title">{job.title}, <span style="color: var(--color-text-muted)">{job.org}</span></div>
+        <div class="timeline-body">
+          <ul>
+            {job.items.map((item) => (
+              <li set:html={item} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

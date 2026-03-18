@@ -1,0 +1,55 @@
+---
+const interests = [
+  "Automated evaluations of LLMs",
+  "Impacts of training interventions",
+  "Deep learning inductive biases & learning dynamics",
+  "Deep learning interpretability",
+  "Applying NLP algorithms to biology & microbiome",
+];
+---
+
+<section class="section">
+  <h2 class="section-title">Research Interests</h2>
+  <div class="interests-grid">
+    {interests.map((interest) => (
+      <div class="interest-chip">{interest}</div>
+    ))}
+  </div>
+  <p class="recent-project">
+    <strong>Most Recent Project:</strong> Developing
+    <a href="https://github.com/JayThibs/supervising-ais-improving-ais" target="_blank" rel="noopener">
+      automated tools
+    </a> to better understand unintended side-effects of interventions on language models.
+  </p>
+</section>
+
+<style>
+  .interests-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .interest-chip {
+    background: var(--color-tag-bg);
+    color: var(--color-tag-text);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all var(--transition);
+  }
+
+  .interest-chip:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+  }
+
+  .recent-project {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-top: 1rem;
+  }
+</style>

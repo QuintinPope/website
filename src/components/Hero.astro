@@ -1,0 +1,76 @@
+---
+---
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Quintin Pope</h1>
+    <p class="hero-subtitle">ML Researcher &middot; Ph.D. Computer Science</p>
+    <p class="hero-tagline">
+      Studying automated evaluations of LLMs, deep learning dynamics, and interpretability.
+    </p>
+    <div class="hero-links">
+      <a href="https://github.com/QuintinPope" class="hero-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://scholar.google.com/citations?user=_bRh_LQAAAAJ" class="hero-link" target="_blank" rel="noopener">Scholar</a>
+      <a href="https://www.lesswrong.com/users/quintin-pope" class="hero-link" target="_blank" rel="noopener">LessWrong</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(135deg, var(--color-accent), #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.8rem;
+    font-weight: 500;
+  }
+
+  .hero-tagline {
+    color: var(--color-text);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin-bottom: 1.2rem;
+  }
+
+  .hero-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+    transition: all var(--transition);
+  }
+
+  .hero-link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(56, 189, 248, 0.05);
+  }
+
+  @media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+  }
+</style>
