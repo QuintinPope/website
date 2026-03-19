@@ -44,6 +44,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <!-- Approach -->
   <section class="section">
     <h2 class="section-title">Approach</h2>
+    <div class="figure-img overview-diagram">
+      <img src="/images/microbiome/Embedding_production_diagram_Fig_1.png" alt="Overview of the microbiome transformer pipeline: input samples are preprocessed into ranked taxa sequences, fed through a pretrained transformer, and used for both sample-level prediction and context-sensitive taxa embeddings." />
+      <p class="figure-caption">Fig 1. End-to-end pipeline: microbiome samples are converted to ranked taxa sequences, processed by a pretrained transformer, and used for sample classification (via CLS token) and context-sensitive taxa embeddings.</p>
+    </div>
     <div class="pipeline">
       <div class="pipeline-step">
         <div class="step-number">1</div>
@@ -65,6 +69,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
             A discriminator network then learns to distinguish generator-filled taxa from original ones.
             Both share a transformer backbone trained on unlabeled American Gut Project data.
           </p>
+          <div class="step-figure">
+            <img src="/images/microbiome/Pretraining_diagram_Fig_3.png" alt="ELECTRA pretraining scheme showing generator and discriminator transformer architecture" />
+          </div>
         </div>
       </div>
       <div class="pipeline-step">
@@ -133,6 +140,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         <span class="figure-label">Fig 4</span>
         <h3>Taxonomic Structure Emerges in Embedding Space</h3>
       </div>
+      <div class="figure-img">
+        <img src="/images/microbiome/Phylum_colored_embeddings_Fig_4.png" alt="t-SNE visualizations of vocabulary embeddings (a) vs contextualized embeddings (b) colored by phylum, with phylum purity comparison plot (c)" />
+      </div>
       <div class="figure-description">
         <p>
           t-SNE visualizations comparing original vocabulary embeddings (left) with contextualized
@@ -154,6 +164,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         <span class="figure-label">Fig 5</span>
         <h3>Contextualization Disentangles Mixed Clusters</h3>
       </div>
+      <div class="figure-img">
+        <img src="/images/microbiome/Embeddings_comparisons_Fig_5.png" alt="Mapping between vocabulary and contextualized embedding spaces showing how taxa from mixed clusters get reorganized into coherent phylum groups" />
+      </div>
       <div class="figure-description">
         <p>
           This figure maps how taxa move between the vocabulary embedding space and the
@@ -174,6 +187,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         <span class="figure-label">Fig 7</span>
         <h3>Metabolic Pathway Correlations</h3>
       </div>
+      <div class="figure-img">
+        <img src="/images/microbiome/Correlation_strength_histograms_Fig_7.png" alt="Histogram comparing correlation strength distributions between contextualized transformer embeddings and GloVe embeddings against metabolic pathways" />
+      </div>
       <div class="figure-description">
         <p>
           Distribution of the magnitude of statistically significant correlations between embedding
@@ -193,6 +209,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <div class="figure-header">
         <span class="figure-label">Fig 8</span>
         <h3>IBD Attribution in Embedding Space</h3>
+      </div>
+      <div class="figure-img">
+        <img src="/images/microbiome/Attribution_colored_contextual_embeddings_Fig_8.png" alt="t-SNE visualization of contextualized embeddings colored by IBD attribution, with warm yellow for IBD-associated taxa and deep purple for healthy-associated taxa" />
       </div>
       <div class="figure-description">
         <p>
@@ -395,6 +414,50 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     font-size: 0.9rem;
     line-height: 1.65;
     margin-bottom: 0.6rem;
+  }
+
+  /* Figure images */
+  .figure-img {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .figure-img img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    padding: 0.75rem;
+  }
+
+  .figure-caption {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .overview-diagram {
+    margin-bottom: 1.5rem;
+  }
+
+  .overview-diagram img {
+    max-width: 680px;
+  }
+
+  .step-figure {
+    margin-top: 0.8rem;
+  }
+
+  .step-figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    padding: 0.5rem;
   }
 
   .figure-takeaway {
