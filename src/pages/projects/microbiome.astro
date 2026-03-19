@@ -1,0 +1,432 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Microbiome Transformers | Quintin Pope">
+  <div class="project-header">
+    <a href="/projects" class="back-link">&larr; Projects</a>
+    <h1>Learning a Deep Language Model for Microbiomes</h1>
+    <p class="project-desc">
+      Adapting NLP self-supervised pretraining to gut microbiome data. We used an ELECTRA-style
+      transformer to learn context-sensitive taxa embeddings from the American Gut Project, producing
+      representations that capture taxonomic structure, correlate with metabolic pathways, and
+      generalize to independent disease-prediction datasets. Published in
+      <a href="https://doi.org/10.1371/journal.pcbi.1011353" target="_blank" rel="noopener">PLOS Computational Biology, 2025</a>.
+    </p>
+    <p class="project-authors">
+      Quintin Pope, Rohan Varma, Christine Tataru, Maude M. David, Xiaoli Fern
+    </p>
+    <div class="project-links-row">
+      <a href="https://doi.org/10.1371/journal.pcbi.1011353" target="_blank" rel="noopener">Paper &rarr;</a>
+      <a href="https://github.com/QuintinPope/microbiome_transformers" target="_blank" rel="noopener">GitHub &rarr;</a>
+    </div>
+  </div>
+
+  <!-- Motivation -->
+  <section class="section">
+    <h2 class="section-title">Motivation</h2>
+    <div class="prose">
+      <p>
+        The human gut microbiome&mdash;the ecosystem of trillions of microbes living in our digestive
+        tract&mdash;is linked to conditions ranging from inflammatory bowel disease to mental health.
+        But microbiome datasets are high-dimensional, sparse, and notoriously variable across studies.
+        Standard machine learning models trained on one cohort often fail on another.
+      </p>
+      <p>
+        We asked: can the same self-supervised pretraining revolution that transformed NLP also work
+        for microbial communities? By treating each microbiome sample as a "sentence" of microbial
+        taxa ranked by abundance, we trained a transformer to learn the compositional grammar of
+        microbial ecosystems from large-scale unlabeled data.
+      </p>
+    </div>
+  </section>
+
+  <!-- Approach -->
+  <section class="section">
+    <h2 class="section-title">Approach</h2>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Tokenization</h3>
+          <p>
+            Each microbiome sample is converted to a token sequence by ranking all observed taxa in
+            decreasing order of relative abundance, truncated to the 512 most abundant&mdash;analogous
+            to words in a sentence.
+          </p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>ELECTRA Pretraining</h3>
+          <p>
+            A generator network learns to predict masked taxa from the surrounding microbial context.
+            A discriminator network then learns to distinguish generator-filled taxa from original ones.
+            Both share a transformer backbone trained on unlabeled American Gut Project data.
+          </p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Finetuning</h3>
+          <p>
+            The pretrained discriminator's token-level head is replaced with a CLS classification head.
+            Labeled microbiome data is then used to finetune for downstream tasks such as IBD prediction
+            and dietary pattern classification.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Results -->
+  <section class="section">
+    <h2 class="section-title">Key Results</h2>
+    <div class="results-grid">
+      <div class="card result-card">
+        <h3>Cross-Study Generalization</h3>
+        <p>
+          While in-domain performance on IBD and diet prediction was comparable to baselines, the
+          transformer representations <strong>significantly outperformed</strong> all baselines
+          when generalizing to independent test datasets (Halfvarson, HMP2)&mdash;even under
+          substantial distribution shift between training and test populations.
+        </p>
+      </div>
+      <div class="card result-card">
+        <h3>Context-Sensitive Embeddings</h3>
+        <p>
+          Unlike static embeddings (e.g., GloVe), the transformer produces
+          <strong>contextualized representations</strong> where the same bacterial taxon receives
+          different embeddings depending on its microbial neighbors. This mirrors how the same word
+          means different things in different sentences.
+        </p>
+      </div>
+      <div class="card result-card">
+        <h3>Emergent Biological Structure</h3>
+        <p>
+          Despite never being given taxonomic labels, the pretrained embeddings spontaneously
+          organized by phylum. K-means clustering on contextualized embeddings achieved roughly
+          <strong>20 percentage points higher phylum purity</strong> compared to GloVe-style
+          embeddings.
+        </p>
+      </div>
+      <div class="card result-card">
+        <h3>Metabolic Pathway Correlations</h3>
+        <p>
+          Embedding dimensions showed statistically significant correlations with known metabolic
+          pathways, despite the model never being exposed to metabolic data. The contextualized
+          embeddings captured <strong>stronger pathway correlations</strong> than prior embedding
+          methods.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visual Highlights -->
+  <section class="section">
+    <h2 class="section-title">Visual Highlights from the Paper</h2>
+
+    <div class="figure-card">
+      <div class="figure-header">
+        <span class="figure-label">Fig 4</span>
+        <h3>Taxonomic Structure Emerges in Embedding Space</h3>
+      </div>
+      <div class="figure-description">
+        <p>
+          t-SNE visualizations comparing original vocabulary embeddings (left) with contextualized
+          transformer embeddings (right), each point colored by phylum. The vocabulary embeddings
+          show some phylum clustering, but the contextualized embeddings form dramatically tighter,
+          more distinct phylum groups. A companion plot of phylum purity vs. number of K-means
+          clusters confirms this quantitatively: the transformer's contextualized space consistently
+          achieves ~20 percentage points higher purity across all values of K.
+        </p>
+        <p class="figure-takeaway">
+          The transformer learns that taxonomically related bacteria behave similarly&mdash;without
+          ever being told which bacteria are related.
+        </p>
+      </div>
+    </div>
+
+    <div class="figure-card">
+      <div class="figure-header">
+        <span class="figure-label">Fig 5</span>
+        <h3>Contextualization Disentangles Mixed Clusters</h3>
+      </div>
+      <div class="figure-description">
+        <p>
+          This figure maps how taxa move between the vocabulary embedding space and the
+          contextualized embedding space. Taxa from a single phylum that were scattered across
+          multiple clusters in the vocabulary space get pulled into tight, coherent clusters after
+          contextualization. The transformer extracts "threads" of related taxa from mixed
+          neighborhoods and reorganizes them by biological function.
+        </p>
+        <p class="figure-takeaway">
+          Context transforms a noisy embedding into one where biological relationships become the
+          dominant organizational principle.
+        </p>
+      </div>
+    </div>
+
+    <div class="figure-card">
+      <div class="figure-header">
+        <span class="figure-label">Fig 7</span>
+        <h3>Metabolic Pathway Correlations</h3>
+      </div>
+      <div class="figure-description">
+        <p>
+          Distribution of the magnitude of statistically significant correlations between embedding
+          dimensions and known metabolic pathways, comparing the contextualized transformer
+          embeddings against prior GloVe-based microbiome embeddings. The transformer embeddings
+          exhibit stronger correlations with metabolic function, suggesting the model captures
+          functionally relevant microbial interactions during pretraining.
+        </p>
+        <p class="figure-takeaway">
+          Self-supervised pretraining on abundance data alone recovers signals about microbial
+          metabolism.
+        </p>
+      </div>
+    </div>
+
+    <div class="figure-card">
+      <div class="figure-header">
+        <span class="figure-label">Fig 8</span>
+        <h3>IBD Attribution in Embedding Space</h3>
+      </div>
+      <div class="figure-description">
+        <p>
+          A t-SNE visualization of the contextualized embeddings colored by attribution to
+          inflammatory bowel disease (IBD). Taxa associated with IBD appear in warm yellow tones,
+          while taxa associated with healthy states appear in deep purple. The separation reveals that
+          the pretrained representations already encode disease-relevant structure before any
+          supervised finetuning on IBD labels.
+        </p>
+        <p class="figure-takeaway">
+          Disease signal is latent in the microbial language&mdash;the transformer learns to surface it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section">
+    <h2 class="section-title">About the Approach</h2>
+    <div class="info-grid">
+      <div class="card">
+        <h3>Why ELECTRA?</h3>
+        <p>
+          ELECTRA's replaced-token-detection objective is more sample-efficient than masked language
+          modeling (BERT-style), which matters when working with biological datasets far smaller than
+          typical NLP corpora. The discriminator sees every token rather than just the ~15% that are
+          masked, extracting more training signal per sample.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Data: American Gut Project</h3>
+        <p>
+          The model was pretrained on 16S rRNA amplicon sequencing data from the American Gut
+          Project&mdash;one of the largest crowd-sourced microbiome studies. This provided a broad
+          base of microbial community diversity for learning general-purpose representations.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Generalization Challenge</h3>
+        <p>
+          Microbiome data varies enormously across studies due to differences in sample collection,
+          DNA extraction, sequencing protocols, and study populations. Models that perform well
+          in-domain often collapse on external data. Our cross-study evaluation directly measures
+          this critical capability.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .project-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-desc {
+    color: var(--color-text-muted);
+    max-width: 760px;
+  }
+
+  .project-authors {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  .project-links-row {
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .prose {
+    max-width: 760px;
+  }
+
+  .prose p {
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.75;
+  }
+
+  /* Pipeline steps */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 760px;
+  }
+
+  .pipeline-step {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    transition: border-color var(--transition);
+  }
+
+  .pipeline-step:hover {
+    border-color: var(--color-accent);
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 0.15rem;
+  }
+
+  .step-content h3 {
+    color: var(--color-text);
+    margin-bottom: 0.3rem;
+    font-size: 1.05rem;
+  }
+
+  .step-content p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* Results grid */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .result-card h3 {
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .result-card p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* Figure cards */
+  .figure-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color var(--transition);
+  }
+
+  .figure-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .figure-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .figure-label {
+    flex-shrink: 0;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .figure-header h3 {
+    color: var(--color-text);
+    font-size: 1.05rem;
+  }
+
+  .figure-description p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin-bottom: 0.6rem;
+  }
+
+  .figure-takeaway {
+    color: var(--color-accent) !important;
+    font-weight: 500;
+    font-size: 0.88rem !important;
+    border-left: 3px solid var(--color-accent);
+    padding-left: 0.8rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Info grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .info-grid .card h3 {
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .info-grid .card p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .results-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
